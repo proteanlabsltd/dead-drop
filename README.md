@@ -4,6 +4,8 @@ Browse and transfer files between your own Tailscale machines, without syncing. 
 
 This is a v0.1 implementation under validation. Release URLs below become available when a verified release is published; no release has been published from this workspace.
 
+Track outstanding work in [TODO.md](TODO.md).
+
 ## Install
 
 Linux (already running Tailscale and systemd):
