@@ -1,0 +1,256 @@
+Implementation plan · v0.1
+
+# Dead Drop — browse and move files on Tailscale hosts without syncing
+
+A macOS menu bar app and a Linux daemon/CLI. Files stay where they live; the Mac app is a window onto each connected machine's filesystem with drag-in / download-out transfers. Discovery, connectivity and authentication all ride on the user's existing Tailscale tailnet.
+
+## Summary
+
+Outcome
+
+### Two shippable artifacts
+
+`deaddrop`: a single static Go binary for Linux that serves a filesystem API on the tailnet and doubles as a CLI client. `Dead Drop.app`: a SwiftUI `MenuBarExtra` app that lists online tailnet hosts running the daemon, browses their directories, and transfers files in and out.
+
+Constraint
+
+### No sync, no accounts, no relay
+
+Nothing is mirrored or cached beyond directory listings. There is no Dead Drop server or login — Tailscale node identity *is* the auth. Traffic never leaves the tailnet.
+
+Success
+
+### Zero-config happy path
+
+Install the daemon on a VPS that is already on the tailnet, open the Mac app, and the host appears within 30 s. Browse to a directory, drop a 1 GB file onto the popover, and it lands intact on the VPS; download a file back with a right-click. No IPs, ports, keys, or pairing steps typed by the user.
+
+## Decisions locked
+
+Decision | Choice | Why (and what was rejected)
+--- | --- | ---
+Transport | Plain HTTP/1.1 + JSON over the tailnet, port `7477`, daemon bound only to the node's Tailscale IPs | Tailscale already gives WireGuard encryption and stable addressing. Rejected: SFTP-only (no daemon needed, but no discovery, awkward auth, no progress/resume control); gRPC (heavier for Swift client); tsnet embedded node (adds a second device per host to the tailnet).
+Authentication | Daemon calls tailscaled LocalAPI `whois` for each request's remote address; allows only peers whose login matches the configured `allow_users` (default: the node's own owner) | Standard Tailscale-native pattern; nothing to provision. Rejected: shared tokens, mTLS, Tailscale Serve/Funnel (Funnel would expose to the public internet).
+Discovery | Mac app runs `tailscale status --json`, filters online Linux peers, probes `GET /v1/info` on each; re-runs every 30 s, on wake, and on network change | Works with both the App Store and standalone Tailscale clients (the LocalAPI socket is not reliably reachable from a non-Tailscale process on macOS). Rejected: mDNS (blocked across tailnet), manual host entry (kept only as a fallback field).
+Daemon language | Go 1.22+, one static binary, `cmd/deaddrop` with `serve` + client subcommands | Cross-compiles to amd64/arm64 trivially; Tailscale's own tooling is Go. Rejected: Rust (fine, but slower iteration for this scope).
+Mac stack | Swift 6 / SwiftUI, macOS 14+, `MenuBarExtra(.window)`, not sandboxed, Developer ID signed + notarized, distributed as DMG | Needs to shell out to the Tailscale CLI and write anywhere the user drops files — App Sandbox would block both. Rejected: Electron/Tauri.
+Exposed paths | Daemon exposes one or more configured `roots` (default: home directory of the service user). All paths are resolved with symlinks and must stay inside a root. | Prevents the daemon becoming a root filesystem browser by accident. Rejected: exposing `/`.
+Write semantics | Uploads stream to `<name>.deaddrop-part`, fsync, then atomic rename. Overwrite refused unless `?overwrite=1`. Resume via `?offset=`. | Partial files never appear under their final name; a dropped connection is retried from the last byte.
+v0.1 scope | Browse, download, upload, mkdir. **Not** in v0.1: delete, rename, move, drag-out to Finder, file preview, Windows/Linux GUI. | Matches the brief (view + transfer in/out). Delete/rename are one endpoint each and are queued for v0.2 once the auth model has been used in anger.
+
+## Architecture
+
+### Mac · Dead Drop.app
+
+- `DeadDropKit` (Swift package): `TailscaleDiscovery`, `HostClient`, `TransferManager`, models
+- `DeadDrop` app target: `MenuBarExtra`, popover views, Settings window, login item
+- Runs `tailscale status --json` via `Process`
+- Transfers via `URLSession` upload/download tasks
+
+HTTP/1.1 · JSON
+WireGuard via tailnet
+100.x.y.z:7477
+
+### Linux · deaddrop serve
+
+- `internal/api`: HTTP handlers, streaming read/write
+- `internal/jail`: root confinement, symlink-safe path resolution
+- `internal/tsauth`: LocalAPI `whois` over `/var/run/tailscale/tailscaled.sock`, decision cache (60 s)
+- systemd unit, config at `/etc/deaddrop/config.toml`
+
+The same `deaddrop` binary is also the Linux client (`deaddrop ls`, `get`, `put`) so Linux boxes can talk to each other with no Mac involved.
+
+## Menu bar UI (from the sketch)
+
+vps-fra1
+
+~/srv
+
++
+
+backups/12 items
+
+docker/4 items
+
+logs/31 items
+
+nginx.conf2.1 KB
+
+↑ 1 upload · 43%⚙
+
+- **Host picker** — filled pill, lists discovered hosts with a green/grey dot for reachable/offline. Persist the last selection. Includes “Add host manually…” as a fallback (MagicDNS name or IP).
+- **Path pill** — clickable breadcrumb of the current path inside the selected root; menu lists parent directories and all configured roots. ⌘↑ goes up.
+- **Plus button** — menu: “Upload files…”, “New folder”. The whole popover is also a drop target: dropping files/folders from Finder uploads them into the current directory.
+- **Entry rows** — directories navigate on click; files show size and modified date. Right-click: Download (to ~/Downloads), Download to…, Copy path, Copy `scp` command. Type-to-filter when the popover has focus.
+- **Footer** — collapsed transfer summary; click expands the transfers list (progress, pause/cancel, retry). Gear opens Settings (launch at login, download location, refresh interval, Tailscale binary path).
+
+Popover fixed at 360×480 pt. Empty states: “No hosts running deaddrop on your tailnet” with the install one-liner; “Tailscale not running” with a button that opens Tailscale.app; “Not allowed” when the daemon returns 403, quoting the required `allow_users` entry.
+
+## Wire protocol (v1)
+
+All responses are JSON unless streaming file bytes. Paths are absolute within the daemon's view (e.g. `/home/axl/srv`); the daemon maps them to real paths only after confinement checks. Errors: `{"error":{"code":"not_found|forbidden|exists|invalid_path|io|bad_request","message":"…"}}` with matching HTTP status (404/403/409/400/500).
+
+Method · Path | Request | Response
+--- | --- | ---
+`GET /v1/info` | — | `{"name":"vps-fra1","version":"0.1.0","protocol":1,"roots":["/home/axl"],"user":"axl@github"}` — `user` is the caller's identity as seen by whois (useful for debugging 403s).
+`GET /v1/ls?path=` | Directory path | `{"path":"/home/axl/srv","entries":[{"name":"backups","type":"dir","size":4096,"mtime":"2026-09-10T18:02:11Z","mode":"drwxr-xr-x"},{"name":"nginx.conf","type":"file","size":2147,…}]}`. `type` ∈ `file|dir|symlink|other`; symlinks report their target type in `link_type`. Sorted dirs-first, case-insensitive.
+`GET /v1/stat?path=` | Any path | Single entry object as above.
+`GET /v1/read?path=` | File path. Honours `Range: bytes=N-`. | Raw bytes, `Content-Length`, `Last-Modified`, `ETag` (size-mtime), `Accept-Ranges: bytes`. 206 on range.
+`PUT /v1/write?path=&offset=0&overwrite=0` | Raw body, `Content-Length` required. Optional `X-Expected-Size` (total) and `X-Content-SHA256` (verified on final chunk). | Writes to `<path>.deaddrop-part`; when written bytes == expected size, fsync + rename. Returns the final `stat` entry, or `{"partial":true,"size":N}`. 409 `exists` if the target exists and `overwrite=0`. `HEAD /v1/write?path=` returns `X-Partial-Size` so clients can resume.
+`POST /v1/mkdir` | `{"path":"…"}` | Entry of new directory; 409 if it exists.
+
+Every request is authenticated before routing: the daemon extracts the peer IP, calls `GET /localapi/v0/whois?addr=IP:port` on the tailscaled unix socket, and requires `UserProfile.LoginName ∈ allow_users` (or a node tag in `allow_tags`). Non-tailnet addresses get no whois answer and are rejected with 403 before any filesystem access. Results are cached per peer IP for 60 s.
+
+## Linux daemon & CLI
+
+#### Commands
+
+```
+# server
+deaddrop serve [--config /etc/deaddrop/config.toml] [--root PATH ...] [--port 7477]
+deaddrop install --user axl [--root /home/axl --root /srv]   # writes config + systemd unit, enables + starts
+deaddrop status                                                # local daemon health + which tailscale IPs it is bound to
+
+# client (host = MagicDNS short name or IP; port optional)
+deaddrop hosts                          # discovers tailnet peers answering /v1/info
+deaddrop ls   vps-fra1:/home/axl/srv
+deaddrop get  vps-fra1:/home/axl/srv/nginx.conf ./           # resumable, progress bar on TTY
+deaddrop put  ./dump.sql vps-fra1:/home/axl/srv/backups/     # resumable, --overwrite
+deaddrop mkdir vps-fra1:/home/axl/srv/new
+```
+
+#### Config — `/etc/deaddrop/config.toml`
+
+```
+port = 7477
+roots = ["/home/axl", "/srv"]
+allow_users = ["axl@github"]      # defaults to the login that owns this node if omitted
+allow_tags  = []                  # e.g. ["tag:workstation"]
+follow_symlinks_outside_root = false
+```
+
+#### systemd unit (written by `deaddrop install`)
+
+```
+[Unit]
+Description=Dead Drop file daemon
+After=network-online.target tailscaled.service
+Wants=tailscaled.service
+
+[Service]
+User=axl
+ExecStart=/usr/local/bin/deaddrop serve --config /etc/deaddrop/config.toml
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/home/axl /srv
+SupplementaryGroups=tailscale   # only if the distro restricts the LocalAPI socket
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The daemon runs *as the user whose files it exposes*, so ordinary Unix permissions are the second line of defence. It enumerates its Tailscale IPs via LocalAPI `/localapi/v0/status` at start and rebinds if they change (watched every 30 s). If tailscaled is unreachable it logs and retries; it never falls back to binding `0.0.0.0`.
+
+#### Repository layout
+
+```
+dead-drop/
+├── daemon/                     # Go module github.com/protean-labs/dead-drop/daemon
+│   ├── cmd/deaddrop/main.go
+│   ├── internal/api/           # handlers, streaming, error mapping
+│   ├── internal/jail/          # root confinement (unit-tested hardest)
+│   ├── internal/tsauth/        # LocalAPI whois + cache
+│   ├── internal/client/        # Go client used by CLI subcommands
+│   └── internal/install/       # config + systemd writer
+├── mac/
+│   ├── DeadDrop.xcodeproj
+│   ├── DeadDrop/               # app target: App.swift, PopoverView, HostPicker, EntryList, TransfersView, SettingsView
+│   └── DeadDropKit/            # SPM package: Discovery, HostClient, TransferManager, Models (+ tests)
+├── docs/protocol.md            # canonical copy of the table above
+├── scripts/install.sh          # curl | sh installer: detects arch, downloads release, runs `deaddrop install`
+├── .goreleaser.yaml
+└── Makefile                    # build-daemon, build-mac, test, release
+```
+
+## Runtime flows
+
+#### Discovery → connected
+
+### 1. Poll Tailscale
+
+App runs `tailscale status --json` (binary found at `/usr/local/bin/tailscale`, `/opt/homebrew/bin/tailscale`, or inside `Tailscale.app`). Parse `Peer[*].{HostName,DNSName,TailscaleIPs,OS,Online}`.
+
+### 2. Probe
+
+For each online peer with `OS == "linux"` (and any manual hosts): `GET http://IP:7477/v1/info`, 1.5 s timeout, max 8 in parallel.
+
+### 3. Publish host list
+
+Hosts that answered become *connected*; previously seen hosts that fail become *offline* but stay in the picker. Repeat every 30 s, on wake (`NSWorkspace.didWakeNotification`), and on `NWPathMonitor` change.
+
+#### Upload (drop onto popover)
+
+### 1. Enqueue
+
+Each dropped file becomes a `Transfer` (direction, local URL, remote path, size, state). Folders are walked and enqueued as `mkdir` + files. `stat` the target first; if it exists, prompt Replace/Skip once per batch.
+
+### 2. Stream
+
+`URLSession.uploadTask(with:fromFile:)` to `PUT /v1/write` with `X-Expected-Size`. Max 3 concurrent transfers per host. Progress from `URLSessionTaskDelegate`.
+
+### 3. Resume or finish
+
+On network error: `HEAD /v1/write` → `X-Partial-Size`, re-PUT from that offset (up to 5 retries, backoff 2 s→30 s). On success, refresh the listing if the directory is visible; post a notification if the popover is closed.
+
+#### Download
+
+Right-click → Download: `URLSession.downloadTask` against `/v1/read` into a temp file, then move to the configured download directory (default `~/Downloads`), de-duplicating names Finder-style (`file 2.txt`). Resume uses `Range`. Downloading a directory walks `ls` recursively and preserves structure.
+
+## Implementation phases
+
+Phase | Work | Done when
+--- | --- | ---
+**0 · Bootstrap** | Init git repo in `/Users/axl/Code/protean-labs/dead-drop`, layout above, `brew install go goreleaser` (Go is not currently installed on this Mac), Makefile, `docs/protocol.md`, CI (GitHub Actions: `go test`, `go vet`, `xcodebuild test` on macOS runner). | `make test` passes green on an empty skeleton.
+**1 · Daemon core** | `internal/jail` with exhaustive tests; `internal/api` for info/ls/stat/read/write/mkdir; `internal/tsauth` with an interface so tests inject a fake whois; `deaddrop serve` with LocalAPI IP enumeration and rebind; structured logs (slog) to journald. | Handler tests cover every error code; a 2 GB upload via `curl` over a real tailnet lands with matching SHA-256; traversal/symlink-escape tests fail closed.
+**2 · Linux CLI + install** | `internal/client`, `hosts/ls/get/put/mkdir` subcommands with resume and TTY progress, `deaddrop install`, `scripts/install.sh`, goreleaser for linux/amd64 + arm64 (static, `CGO_ENABLED=0`). | Fresh Ubuntu 24.04 VPS: `curl -fsSL …/install.sh | sh` → `systemctl status deaddrop` active; `deaddrop put` from a second Linux box round-trips a file.
+**3 · Mac browse** | Xcode project, `DeadDropKit` with `TailscaleDiscovery` (fixture-tested parser), `HostClient` (async/await, typed errors), `MenuBarExtra` popover with host picker, path pill, entry list, empty/error states, Settings, launch-at-login (`SMAppService`). | App shows real hosts within 30 s of launch, navigates directories, survives Tailscale being toggled off/on without restart.
+**4 · Mac transfers** | `TransferManager` (queue, concurrency, resume, notifications), drop target on the popover, `+` menu (Upload files…, New folder), context-menu Download / Download to…, transfers footer + expanded list, directory upload/download. | Drop a 1 GB file, pull the network cable mid-way, reconnect: transfer completes with no user action and the SHA-256 matches. Cancelling leaves no `.deaddrop-part` file behind (daemon removes it on explicit `DELETE /v1/write?path=` — the only delete in v0.1, scoped to partials).
+**5 · Ship** | Developer ID signing, notarization, DMG via `create-dmg`; Sparkle appcast for updates; `README` with the two install one-liners; tag `v0.1.0`, goreleaser publishes Linux binaries + checksums to GitHub Releases. | A clean Mac (no dev tools) opens the DMG, launches the app with no Gatekeeper warning, and completes the Success scenario from the summary.
+
+Phases 1–2 and 3 can proceed in parallel once `docs/protocol.md` is committed in phase 0; the Mac client can be developed against a daemon running locally on the Mac with `--insecure-allow-loopback` (dev-only flag that skips whois for 127.0.0.1).
+
+## Verification
+
+**Definition of done (v0.1):** from a Mac and a Linux VPS that share a tailnet and have nothing else configured, the Success scenario in the summary passes end to end, every daemon endpoint rejects a request from a non-allowed tailnet user with 403 and from a non-tailnet address with 403, and no path outside the configured roots is ever readable or writable.
+
+#### Automated
+
+- `jail` table tests: `..` segments, URL-encoded traversal, absolute paths outside roots, symlink pointing outside root (file and directory), symlink loop, race between `stat` and `open` (use `openat2` /`RESOLVE_BENEATH` on Linux ≥ 5.6, fall back to lstat-walk).
+- `api` handler tests with fake whois: allowed user, disallowed user, tagged node, whois error → 403; range reads; partial write then resume; overwrite refused/allowed; mkdir exists; `Content-Length` missing → 411.
+- `tsauth` cache test: entry expires at 60 s, negative results not cached longer than 5 s.
+- `DeadDropKit`: `TailscaleDiscovery` parses fixtures from standalone and App Store Tailscale clients (offline peers, peers with no IPv4, exit nodes); `HostClient` maps every error code to a typed `HostError`; `TransferManager` resumes from a mocked `X-Partial-Size`.
+- CI runs `go test -race ./...`, `go vet`, `staticcheck`, `xcodebuild test -scheme DeadDropKit`.
+
+#### Manual acceptance (per release)
+
+- Install on Ubuntu 24.04 (amd64) and Debian 12 (arm64) VPSes; both appear in the Mac picker within 30 s.
+- Upload 1 GB file, cut Wi-Fi at ~40 %, restore: completes, hash matches, only one file exists at the destination.
+- Second tailnet user (or a node with an unlisted login) sees the host but gets the “Not allowed” state naming the login to add.
+- Quit Tailscale.app: picker shows “Tailscale not running” within 30 s; relaunch restores hosts without restarting Dead Drop.
+- Mac sleeps 10 min mid-listing; on wake the popover refreshes and no stale transfer is stuck.
+- Gatekeeper: fresh user account opens the notarized DMG with no warning.
+
+## Assumptions and risks
+
+**Assumptions.** Tailscale is installed and logged in on every machine involved; MagicDNS is enabled (only needed for CLI host names — the Mac app uses IPs). Linux hosts run systemd. All users of a host are in a single tailnet and authenticate as the same login (multi-user ACLs are config-only in v0.1). Targets: macOS 14+, Go 1.22+, Xcode 16+ (Xcode 26.6 present locally). Tailscale is installed at `/usr/local/bin/tailscale` on the development Mac.
+
+**Risks and mitigations.**
+- ** LocalAPI socket permissions** vary by distro (`/var/run/tailscale/tailscaled.sock` is often root:root 0660 or group `tailscale`). `deaddrop install` detects this and adds `SupplementaryGroups` or prints the exact `chgrp` fix; the daemon refuses to start rather than run unauthenticated.
+- **whois by IP only is a tailnet-level trust boundary**: any process on an allowed peer can use the daemon. Acceptable for v0.1 (same as Tailscale SSH); document it. Per-node ACLs via Tailscale grants are a v0.2 candidate.
+- **App Store Tailscale client** may not ship a CLI in older versions. Fallback: manual host entry plus a Settings field for the CLI path; show a clear message if `tailscale status` cannot run.
+- **Large directories** (100k entries) will make `ls` slow and the popover heavy. v0.1 caps listings at 5,000 entries with a “truncated” flag and a filter box; pagination is deferred.
+- **Notarization/hardened runtime** can break `Process` spawning of the Tailscale CLI. Test the notarized build, not the debug build, in phase 5.
+- **Name clash**: binary is `deaddrop` (not `dd`). Check the Homebrew formula namespace before tagging.
+
+**Stop implementation if:** whois cannot be made to work for the target distros (fall back to Tailscale SSH + SFTP as the transport, which changes phases 1–2 materially), or the App Store Tailscale client on the target Macs exposes neither a CLI nor the LocalAPI (then discovery must move to a daemon-side registry, a scope change to discuss).
