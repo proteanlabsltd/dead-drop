@@ -1,0 +1,39 @@
+name: DeadDrop
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+targets:
+  DeadDrop:
+    type: application
+    platform: macOS
+    sources:
+      - DeadDrop
+    dependencies:
+      - package: DeadDropKit
+      - package: Sparkle
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.proteanlabs.DeadDrop
+        PRODUCT_NAME: Dead Drop
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: DeadDrop/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DeadDrop/DeadDrop.entitlements
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_SUPublicEDKey: "$(SPARKLE_PUBLIC_KEY)"
+    scheme:
+      testTargets: []
+packages:
+  DeadDropKit:
+    path: DeadDropKit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.6.0

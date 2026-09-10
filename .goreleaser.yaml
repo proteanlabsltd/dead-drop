@@ -1,0 +1,25 @@
+version: 2
+project_name: deaddrop
+builds:
+  - id: deaddrop
+    dir: daemon
+    main: ./cmd/deaddrop
+    binary: deaddrop
+    env: [CGO_ENABLED=0]
+    goos: [linux]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+archives:
+  - formats: [tar.gz]
+    name_template: 'deaddrop_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    files: [README.md, docs/protocol.md]
+checksum:
+  name_template: checksums.txt
+release:
+  github:
+    owner: protean-labs
+    name: dead-drop
+changelog:
+  sort: asc

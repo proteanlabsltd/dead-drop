@@ -1,0 +1,394 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		107BBA79A5F252DC1776961C /* DeadDropKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB31403FFA8710045716DC0D /* DeadDropKit */; };
+		658B686C9D34C76DA20F34BA /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB51A617DC1687AFD909775 /* PopoverView.swift */; };
+		688A9CD6D658078A3FE89539 /* DeadDropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588C187B9F8B6669398B67CC /* DeadDropApp.swift */; };
+		817A2F0E986E57006C650822 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA68F8714295CDF95C91245 /* AppModel.swift */; };
+		97E80FB8C5EA433C04986EEF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28430C5A5ED2A52835063FEA /* SettingsView.swift */; };
+		9B1E2ABD0657D9FD349CD239 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = FC9DF76C12CB807FAD19D030 /* Sparkle */; };
+		CAD5A7546E3CD85CECAF4BC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F5E81223D340FA010E0C7F4 /* Assets.xcassets */; };
+		CD2CAC4B7B6880F75B05395B /* TransfersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254C003F92E5D8DD87459343 /* TransfersView.swift */; };
+		D9B0468DB8CF0B8A27450CD2 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CD636EDA5493032709E2EAD /* SettingsStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0CD636EDA5493032709E2EAD /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		254C003F92E5D8DD87459343 /* TransfersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransfersView.swift; sourceTree = "<group>"; };
+		28430C5A5ED2A52835063FEA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		588C187B9F8B6669398B67CC /* DeadDropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadDropApp.swift; sourceTree = "<group>"; };
+		7CA68F8714295CDF95C91245 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		94AE3CB42BEF7940028EF2C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		96B9B513FD40CB5A599E8570 /* DeadDropKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DeadDropKit; path = DeadDropKit; sourceTree = SOURCE_ROOT; };
+		9F5E81223D340FA010E0C7F4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E3A790D06E517832F0EEFF66 /* DeadDrop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DeadDrop.entitlements; sourceTree = "<group>"; };
+		E46E142D1A668C85E9D9A82D /* DeadDrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DeadDrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDB51A617DC1687AFD909775 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		ABEB3BE9B3ECE39AD537F983 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				107BBA79A5F252DC1776961C /* DeadDropKit in Frameworks */,
+				9B1E2ABD0657D9FD349CD239 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		39194E2443D337AE11BC290C = {
+			isa = PBXGroup;
+			children = (
+				CF9951967CEC37F8795F3165 /* DeadDrop */,
+				D794E90F53674A0D8ACF5CB3 /* Packages */,
+				B01899E042A0778569A8A26B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B01899E042A0778569A8A26B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E46E142D1A668C85E9D9A82D /* DeadDrop.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CF9951967CEC37F8795F3165 /* DeadDrop */ = {
+			isa = PBXGroup;
+			children = (
+				7CA68F8714295CDF95C91245 /* AppModel.swift */,
+				9F5E81223D340FA010E0C7F4 /* Assets.xcassets */,
+				E3A790D06E517832F0EEFF66 /* DeadDrop.entitlements */,
+				588C187B9F8B6669398B67CC /* DeadDropApp.swift */,
+				94AE3CB42BEF7940028EF2C3 /* Info.plist */,
+				FDB51A617DC1687AFD909775 /* PopoverView.swift */,
+				0CD636EDA5493032709E2EAD /* SettingsStore.swift */,
+				28430C5A5ED2A52835063FEA /* SettingsView.swift */,
+				254C003F92E5D8DD87459343 /* TransfersView.swift */,
+			);
+			path = DeadDrop;
+			sourceTree = "<group>";
+		};
+		D794E90F53674A0D8ACF5CB3 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				96B9B513FD40CB5A599E8570 /* DeadDropKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CCCB87C9DBA24BE1208AD400 /* DeadDrop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 40FF3FE4062AD466F66C5493 /* Build configuration list for PBXNativeTarget "DeadDrop" */;
+			buildPhases = (
+				9F139753043C3F11A91D1E19 /* Sources */,
+				CFA915396C0B2A06E750E743 /* Resources */,
+				ABEB3BE9B3ECE39AD537F983 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DeadDrop;
+			packageProductDependencies = (
+				CB31403FFA8710045716DC0D /* DeadDropKit */,
+				FC9DF76C12CB807FAD19D030 /* Sparkle */,
+			);
+			productName = DeadDrop;
+			productReference = E46E142D1A668C85E9D9A82D /* DeadDrop.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E8500464311E806C4FA69171 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = B21AABC850535C9CEE5C52A3 /* Build configuration list for PBXProject "DeadDrop" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 39194E2443D337AE11BC290C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				21CC8E83C62CA22B79C10E54 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				9941D05421F62FDABDA44D78 /* XCLocalSwiftPackageReference "DeadDropKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B01899E042A0778569A8A26B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CCCB87C9DBA24BE1208AD400 /* DeadDrop */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CFA915396C0B2A06E750E743 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAD5A7546E3CD85CECAF4BC6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9F139753043C3F11A91D1E19 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				817A2F0E986E57006C650822 /* AppModel.swift in Sources */,
+				688A9CD6D658078A3FE89539 /* DeadDropApp.swift in Sources */,
+				658B686C9D34C76DA20F34BA /* PopoverView.swift in Sources */,
+				D9B0468DB8CF0B8A27450CD2 /* SettingsStore.swift in Sources */,
+				97E80FB8C5EA433C04986EEF /* SettingsView.swift in Sources */,
+				CD2CAC4B7B6880F75B05395B /* TransfersView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DF46301AF6EF382DFF2344D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DeadDrop/DeadDrop.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DeadDrop/Info.plist;
+				INFOPLIST_KEY_SUPublicEDKey = "$(SPARKLE_PUBLIC_KEY)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.proteanlabs.DeadDrop;
+				PRODUCT_NAME = "Dead Drop";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		2301D19A3250F4DFB0D107C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DeadDrop/DeadDrop.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DeadDrop/Info.plist;
+				INFOPLIST_KEY_SUPublicEDKey = "$(SPARKLE_PUBLIC_KEY)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.proteanlabs.DeadDrop;
+				PRODUCT_NAME = "Dead Drop";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		50682C6CC0DA9ABE2B2C8BA3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		8F591830CC62BC5C299D7579 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		40FF3FE4062AD466F66C5493 /* Build configuration list for PBXNativeTarget "DeadDrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DF46301AF6EF382DFF2344D /* Debug */,
+				2301D19A3250F4DFB0D107C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B21AABC850535C9CEE5C52A3 /* Build configuration list for PBXProject "DeadDrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				50682C6CC0DA9ABE2B2C8BA3 /* Debug */,
+				8F591830CC62BC5C299D7579 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		9941D05421F62FDABDA44D78 /* XCLocalSwiftPackageReference "DeadDropKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = DeadDropKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		21CC8E83C62CA22B79C10E54 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CB31403FFA8710045716DC0D /* DeadDropKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DeadDropKit;
+		};
+		FC9DF76C12CB807FAD19D030 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21CC8E83C62CA22B79C10E54 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E8500464311E806C4FA69171 /* Project object */;
+}

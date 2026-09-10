@@ -1,0 +1,31 @@
+name: Validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  daemon:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: daemon/go.mod
+          cache: false
+      - run: go test -race ./...
+        working-directory: daemon
+      - run: go vet ./...
+        working-directory: daemon
+      - run: go run honnef.co/go/tools/cmd/staticcheck@v0.8.1 ./...
+        working-directory: daemon
+      - run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/deaddrop
+        working-directory: daemon
+  mac:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      - run: swift test
+        working-directory: mac/DeadDropKit
+      - run: xcodebuild test -scheme DeadDropKit -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+        working-directory: mac/DeadDropKit
+      - run: make build-mac
