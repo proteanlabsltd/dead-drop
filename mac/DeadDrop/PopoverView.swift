@@ -118,6 +118,9 @@ struct PopoverView: View {
             }.buttonStyle(.plain)
             Spacer()
             Button { openSettings() } label: { Image(systemName: "gearshape") }.buttonStyle(.plain)
+            Button("Quit Dead Drop") { NSApplication.shared.terminate(nil) }
+                .keyboardShortcut("q", modifiers: .command)
+                .buttonStyle(.plain)
         }.padding(.horizontal, 12).frame(height: 36)
     }
 
