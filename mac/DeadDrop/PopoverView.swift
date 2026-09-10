@@ -17,10 +17,11 @@ struct PopoverView: View {
         VStack(spacing: 0) {
             header
             Divider()
-            content
+            content.frame(maxWidth: .infinity, maxHeight: .infinity)
             Divider()
             footer
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(dropTargeted ? Color.accentColor.opacity(0.08) : Color.clear)
         .dropDestination(for: URL.self) { urls, _ in model.prepareUpload(urls); return true } isTargeted: { dropTargeted = $0 }
         .alert("Add host manually", isPresented: $showManualHost) {
@@ -39,7 +40,6 @@ struct PopoverView: View {
             Button("Cancel", role: .cancel) { model.pendingUploads = [] }
         } message: { Text("Choose how Dead Drop should handle names that already exist.") }
         .task {
-            for host in settings.manualHosts { model.discovery.addManualHost(host) }
             await model.refreshHosts()
         }
     }
@@ -49,7 +49,7 @@ struct PopoverView: View {
             HStack {
                 Menu {
                     ForEach(model.discovery.hosts) { host in
-                        Button { model.select(host) } label: { Label(host.name, systemImage: host.reachable ? "circle.fill" : "circle") }
+                        Button { model.select(host) } label: { Label(host.name, systemImage: host.reachable ? "circle.fill" : "circle") }.help(host.status == .daemonUnavailable ? "Online in Tailscale; Dead Drop unavailable" : host.status.rawValue)
                     }
                     Divider()
                     Button("Add host manually…") { showManualHost = true }
@@ -60,7 +60,7 @@ struct PopoverView: View {
                         Text(model.selectedHost?.name ?? "Choose a host").lineLimit(1)
                         Image(systemName: "chevron.down").font(.caption2)
                     }.padding(.horizontal, 10).padding(.vertical, 5).background(.quaternary, in: Capsule())
-                }.menuStyle(.borderlessButton)
+                }.menuStyle(.borderlessButton).menuIndicator(.hidden)
                 Spacer()
                 Menu {
                     Button("Upload files…") { chooseUploads() }
@@ -83,10 +83,11 @@ struct PopoverView: View {
                     Label(model.path.replacingOccurrences(of: FileManager.default.homeDirectoryForCurrentUser.path, with: "~"), systemImage: "folder")
                         .lineLimit(1).truncationMode(.middle)
                 }.menuStyle(.borderlessButton)
+                    .disabled(model.selectedHost?.reachable != true)
                 Spacer()
-                if model.isLoading { ProgressView().controlSize(.small) }
+                if model.isLoading || model.discovery.state == .refreshing { ProgressView().controlSize(.small) }
             }
-            TextField("Filter files", text: $model.filter).textFieldStyle(.roundedBorder)
+            TextField("Filter files", text: $model.filter).textFieldStyle(.roundedBorder).disabled(model.selectedHost?.reachable != true)
         }.padding(12)
     }
 
@@ -95,7 +96,13 @@ struct PopoverView: View {
         else if case .tailscaleUnavailable = model.discovery.state { tailscaleUnavailable }
         else if let error = model.error { errorView(error) }
         else if model.discovery.hosts.isEmpty && !model.isLoading { noHosts }
-        else if model.selectedHost?.reachable == false { empty("Host offline", "Dead Drop will reconnect automatically.", "wifi.slash") }
+        else if model.selectedHost?.status == .daemonUnavailable {
+            VStack(spacing: 12) {
+                empty("Dead Drop unavailable", "This server is online in Tailscale, but its Dead Drop service isn’t responding. Start deaddrop on the server to browse its files.", "shippingbox")
+                Button("Retry") { Task { await model.refreshHosts() } }
+            }.padding(.horizontal, 12)
+        }
+        else if model.selectedHost?.status == .offline { empty("Host offline", "This server is offline in Tailscale. Dead Drop will reconnect automatically.", "wifi.slash") }
         else if model.visibleEntries.isEmpty && !model.isLoading { empty(model.filter.isEmpty ? "This folder is empty" : "No matching files", model.filter.isEmpty ? "Drop files here to upload them." : "Try another filter.", "folder") }
         else {
             List(model.visibleEntries) { entry in EntryRow(entry: entry, model: model, settings: settings) }
@@ -125,7 +132,7 @@ struct PopoverView: View {
     private var noHosts: some View {
         VStack(spacing: 12) {
             empty("No Dead Drop hosts", "Install deaddrop on a Linux host in your tailnet.", "shippingbox")
-            Text("curl -fsSL https://github.com/protean-labs/dead-drop/releases/latest/download/install.sh | sh")
+            Text("curl -fsSL https://github.com/proteanlabsltd/dead-drop/releases/latest/download/install.sh | sh")
                 .font(.caption.monospaced()).textSelection(.enabled).padding(8).background(.quaternary, in: RoundedRectangle(cornerRadius: 6)).padding(.horizontal)
             Button("Add host manually…") { showManualHost = true }.buttonStyle(.link)
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -147,7 +154,7 @@ struct PopoverView: View {
     private func hostColor(_ host: DiscoveredHost?) -> Color {
         switch host?.status {
         case .reachable: .green
-        case .forbidden: .orange
+        case .forbidden, .daemonUnavailable: .orange
         case .offline, .none: .gray
         }
     }

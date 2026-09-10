@@ -12,7 +12,7 @@ public struct HostInfo: Codable, Hashable, Sendable {
     }
 }
 
-public enum HostReachability: String, Codable, Sendable { case reachable, offline, forbidden }
+public enum HostReachability: String, Codable, Sendable { case reachable, daemonUnavailable, offline, forbidden }
 
 public struct DiscoveredHost: Identifiable, Hashable, Sendable {
     public let id: String

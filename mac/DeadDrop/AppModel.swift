@@ -1,7 +1,6 @@
 import AppKit
 import Combine
 import DeadDropKit
-import Network
 import UserNotifications
 
 @MainActor
@@ -18,10 +17,9 @@ final class AppModel: ObservableObject {
 
     let discovery: TailscaleDiscovery
     let transfers = TransferManager()
-    private let pathMonitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue(label: "dev.proteanlabs.deaddrop.network")
     private var cancellables: Set<AnyCancellable> = []
     private var notifiedTransfers: Set<UUID> = []
+    private var loadGeneration = 0
 
     struct ErrorState: Identifiable {
         let id = UUID()
@@ -62,17 +60,11 @@ final class AppModel: ObservableObject {
             Task { @MainActor in await Task.yield(); self?.notifyFinishedTransfers() }
         }.store(in: &cancellables)
         discovery.$hosts.sink { [weak self] hosts in self?.updateSelection(hosts) }.store(in: &cancellables)
-        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)
-            .sink { [weak self] _ in Task { await self?.refreshHosts() } }.store(in: &cancellables)
-        pathMonitor.pathUpdateHandler = { [weak self] _ in Task { @MainActor in await self?.refreshHosts() } }
-        pathMonitor.start(queue: monitorQueue)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         for host in settings.manualHosts { discovery.addManualHost(host) }
         discovery.start(interval: settings.refreshInterval)
         settings.$refreshInterval.dropFirst().sink { [weak self] interval in self?.discovery.start(interval: interval) }.store(in: &cancellables)
     }
-
-    deinit { pathMonitor.cancel() }
 
     func refreshHosts() async { await discovery.refresh() }
 
@@ -84,18 +76,23 @@ final class AppModel: ObservableObject {
     }
 
     func load() async {
-        guard let host = selectedHost, host.reachable else { entries = []; return }
+        loadGeneration += 1
+        let generation = loadGeneration
+        guard let host = selectedHost, host.reachable else { entries = []; isLoading = false; return }
+        let requestedPath = path
         isLoading = true
-        defer { isLoading = false }
+        defer { if generation == loadGeneration { isLoading = false } }
         do {
-            let listing = try await HostClient(host: host).list(path: path)
+            let listing = try await HostClient(host: host).list(path: requestedPath)
+            guard generation == loadGeneration, selectedHost?.id == host.id, path == requestedPath else { return }
             entries = listing.entries
             path = listing.path
             error = nil
-        } catch let hostError as HostError {
-            if case .forbidden(let message) = hostError { error = .init(kind: .forbidden, message: message) }
-            else { error = .init(kind: .general, message: hostError.localizedDescription) }
-        } catch { self.error = .init(kind: .general, message: error.localizedDescription) }
+        } catch {
+            guard generation == loadGeneration, selectedHost?.id == host.id, path == requestedPath else { return }
+            if case HostError.forbidden(let message) = error { self.error = .init(kind: .forbidden, message: message) }
+            else { self.error = .init(kind: .general, message: error.localizedDescription) }
+        }
     }
 
     func open(_ entry: RemoteEntry) {
@@ -169,15 +166,16 @@ final class AppModel: ObservableObject {
             self.selectedHost = updated
             if updated.status == .forbidden {
                 error = .init(kind: .forbidden, message: updated.forbiddenMessage ?? "Your Tailscale login is not listed in allow_users on this host.")
-            } else if error?.kind == .forbidden {
+            } else if !updated.reachable || error?.kind == .forbidden {
                 error = nil
             }
             if path == "/", let root = updated.info?.roots.first { path = root }
             if updated.reachable { Task { await load() } }
+            else { loadGeneration += 1; isLoading = false }
             return
         }
         let saved = UserDefaults.standard.string(forKey: "selectedHost")
-        if let host = hosts.first(where: { $0.id == saved }) ?? hosts.first(where: { $0.reachable }) { select(host) }
+        if let host = hosts.first(where: { $0.id == saved }) ?? hosts.first(where: { $0.reachable }) ?? hosts.first(where: { $0.status == .daemonUnavailable }) ?? hosts.first { select(host) }
     }
 
     private func notifyFinishedTransfers() {

@@ -17,9 +17,74 @@ final class DeadDropKitTests: XCTestCase {
     private func session() -> URLSession { let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [MockURLProtocol.self]; return URLSession(configuration: config) }
     private func response(_ request: URLRequest, _ status: Int = 200, headers: [String: String] = [:]) -> HTTPURLResponse { HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: "HTTP/1.1", headerFields: headers)! }
 
-    func testDiscoveryParsesOnlyOnlineLinuxIPv4Peers() throws {
+    func testDiscoveryParsesLinuxPeersAndIPv6Fallback() throws {
         let json = #"{"Peer":{"a":{"HostName":"vps","DNSName":"vps.tail.ts.net.","TailscaleIPs":["100.65.2.3","fd7a::1"],"OS":"linux","Online":true},"b":{"HostName":"mac","TailscaleIPs":["100.66.3.4"],"OS":"macOS","Online":true},"c":{"HostName":"off","TailscaleIPs":["100.67.4.5"],"OS":"linux","Online":false},"d":{"HostName":"v6","TailscaleIPs":["fd7a:115c:a1e0::2"],"OS":"linux","Online":true}}}"#
-        XCTAssertEqual(try TailscaleStatusParser().parse(Data(json.utf8)), [DiscoveredHost(name: "v6", address: "fd7a:115c:a1e0::2"), DiscoveredHost(name: "vps", address: "100.65.2.3")])
+        XCTAssertEqual(try TailscaleStatusParser().parse(Data(json.utf8)), [DiscoveredHost(name: "off", address: "100.67.4.5", status: .offline), DiscoveredHost(name: "v6", address: "fd7a:115c:a1e0::2", status: .daemonUnavailable), DiscoveredHost(name: "vps", address: "100.65.2.3", status: .daemonUnavailable)])
+    }
+
+    func testDiscoveryUsesDNSNameAndKeepsOfflineLinuxPeers() throws {
+        let json = #"{"BackendState":"Running","Peer":{"a":{"HostName":"ubuntu-8gb-hel1-3","DNSName":"athena.tail.ts.net.","TailscaleIPs":["100.75.180.128"],"OS":"linux","Online":true},"b":{"HostName":"pihole","DNSName":"pihole.tail.ts.net.","TailscaleIPs":["100.123.187.79"],"OS":"linux","Online":false}}}"#
+        let hosts = try TailscaleStatusParser().parse(Data(json.utf8))
+        XCTAssertEqual(hosts.map(\.name), ["athena", "pihole"])
+        XCTAssertEqual(hosts.map(\.status), [.daemonUnavailable, .offline])
+    }
+
+    func testDiscoveryRejectsStoppedBackend() {
+        XCTAssertThrowsError(try TailscaleStatusParser().parse(Data(#"{"BackendState":"Stopped","Peer":{}}"#.utf8)))
+    }
+
+    func testProbePreservesFriendlyNameAndPriorInfoAcrossUnavailableAndReconnect() async {
+        let priorInfo = HostInfo(name: "daemon-internal", version: "0.1", protocol: 1, roots: ["/srv"], user: "me")
+        let host = DiscoveredHost(name: "athena", address: "100.75.180.128", status: .daemonUnavailable, info: priorInfo)
+        MockURLProtocol.handler = { _ in throw URLError(.cannotConnectToHost) }
+        let unavailable = await TailscaleDiscovery.probe(host, session: session())
+        XCTAssertEqual(unavailable.name, "athena")
+        XCTAssertEqual(unavailable.status, .daemonUnavailable)
+        XCTAssertEqual(unavailable.info, priorInfo)
+
+        MockURLProtocol.handler = { request in
+            (self.response(request), Data(#"{"name":"daemon-overwrite-attempt","version":"0.1","protocol":1,"roots":["/srv"],"user":"me"}"#.utf8))
+        }
+        let reconnected = await TailscaleDiscovery.probe(unavailable, session: session())
+        XCTAssertEqual(reconnected.name, "athena")
+        XCTAssertEqual(reconnected.status, .reachable)
+        XCTAssertEqual(reconnected.info?.name, "daemon-overwrite-attempt")
+    }
+
+    @MainActor func testOlderRefreshCannotOverwriteNewerResults() async throws {
+        let statuses = DiscoveryStatusSequence()
+        let discovery = TailscaleDiscovery(statusLoader: { try await statuses.next() }, hostProbe: { host in
+            var host = host; host.status = .reachable; return host
+        })
+        let first = Task { await discovery.refresh() }
+        try await Task.sleep(for: .milliseconds(20))
+        await discovery.refresh()
+        await first.value
+        XCTAssertEqual(discovery.hosts.map(\.name), ["hestia"])
+    }
+
+    @MainActor func testOlderFailedRefreshCannotOverwriteNewerReadyState() async throws {
+        let statuses = FailingDiscoveryStatusSequence()
+        let discovery = TailscaleDiscovery(statusLoader: { try await statuses.next() }, hostProbe: { host in
+            var host = host; host.status = .reachable; return host
+        })
+        let first = Task { await discovery.refresh() }
+        try await Task.sleep(for: .milliseconds(20))
+        await discovery.refresh()
+        await first.value
+        XCTAssertEqual(discovery.state, .ready)
+        XCTAssertEqual(discovery.hosts.map(\.name), ["hestia"])
+    }
+
+    @MainActor func testTailscaleCandidateWinsOverDuplicateManualHost() async {
+        let status = Data(#"{"BackendState":"Running","Peer":{"x":{"HostName":"raw","DNSName":"athena.tail.ts.net.","TailscaleIPs":["100.75.180.128"],"OS":"linux","Online":false}}}"#.utf8)
+        let discovery = TailscaleDiscovery(statusLoader: { status }, hostProbe: { $0 })
+        discovery.addManualHost("100.75.180.128", name: "Manual label")
+        await discovery.refresh()
+        for _ in 0..<20 where discovery.hosts.isEmpty { try? await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertEqual(discovery.hosts.count, 1)
+        XCTAssertEqual(discovery.hosts.first?.name, "athena")
+        XCTAssertEqual(discovery.hosts.first?.status, .offline)
     }
 
     func testHostClientDecodesListingAndEscapesPath() async throws {
@@ -114,6 +179,25 @@ final class DeadDropKitTests: XCTestCase {
         XCTAssertEqual(manager.transfers.filter { $0.state == .completed }.count, 3)
         let maximumConcurrent = await mock.maximumConcurrent
         XCTAssertLessThanOrEqual(maximumConcurrent, 2)
+    }
+}
+
+private actor DiscoveryStatusSequence {
+    private var call = 0
+    func next() async throws -> Data {
+        call += 1
+        let name: String
+        if call == 1 { try await Task.sleep(for: .milliseconds(100)); name = "athena" } else { name = "hestia" }
+        return Data("{\"BackendState\":\"Running\",\"Peer\":{\"x\":{\"HostName\":\"raw\",\"DNSName\":\"\(name).tail.ts.net.\",\"TailscaleIPs\":[\"100.75.180.128\"],\"OS\":\"linux\",\"Online\":true}}}".utf8)
+    }
+}
+
+private actor FailingDiscoveryStatusSequence {
+    private var call = 0
+    func next() async throws -> Data {
+        call += 1
+        if call == 1 { try await Task.sleep(for: .milliseconds(100)); throw HostError.transport("old failure") }
+        return Data(#"{"BackendState":"Running","Peer":{"x":{"HostName":"raw","DNSName":"hestia.tail.ts.net.","TailscaleIPs":["100.75.180.128"],"OS":"linux","Online":true}}}"#.utf8)
     }
 }
 
