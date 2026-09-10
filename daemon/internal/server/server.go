@@ -14,9 +14,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/protean-labs/dead-drop/daemon/internal/api"
-	"github.com/protean-labs/dead-drop/daemon/internal/config"
-	"github.com/protean-labs/dead-drop/daemon/internal/tsauth"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/api"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/config"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/tsauth"
 )
 
 type Options struct {

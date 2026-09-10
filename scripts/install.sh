@@ -8,7 +8,7 @@ service_user=${SUDO_USER:-$(id -un)}
 [ "$service_user" != root ] || { echo 'Run as the user whose files should be exposed (the installer will use sudo).' >&2; exit 1; }
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
-base="https://github.com/protean-labs/dead-drop/releases/download/v$version"
+base="https://github.com/proteanlabsltd/dead-drop/releases/download/v$version"
 archive="deaddrop_${version}_linux_${arch}.tar.gz"
 curl --fail --silent --show-error --location "$base/$archive" -o "$tmp/$archive"
 curl --fail --silent --show-error --location "$base/checksums.txt" -o "$tmp/checksums.txt"

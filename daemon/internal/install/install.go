@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/protean-labs/dead-drop/daemon/internal/config"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/config"
 )
 
 func safe(s string) bool { return s != "" && !strings.ContainsAny(s, "\n\r\x00\"\\%$") }

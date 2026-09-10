@@ -1,3 +1,3 @@
-module github.com/protean-labs/dead-drop/daemon
+module github.com/proteanlabsltd/dead-drop/daemon
 
 go 1.25

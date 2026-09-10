@@ -20,8 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/protean-labs/dead-drop/daemon/internal/jail"
-	"github.com/protean-labs/dead-drop/daemon/internal/tsauth"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/jail"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/tsauth"
 )
 
 type Options struct {

@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/protean-labs/dead-drop/main/scripts
 Mac (download the signed DMG from the release):
 
 ```sh
-open https://github.com/protean-labs/dead-drop/releases/latest
+open https://github.com/proteanlabsltd/dead-drop/releases/latest
 ```
 
 The installer uses sudo to install a static binary and systemd unit, then runs the daemon as your ordinary user. It preserves and validates an existing configuration when upgrading. Default exposed root: that user's home. Configure `/etc/deaddrop/config.toml`:

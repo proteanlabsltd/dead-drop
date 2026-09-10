@@ -19,7 +19,7 @@ checksum:
   name_template: checksums.txt
 release:
   github:
-    owner: protean-labs
+    owner: proteanlabsltd
     name: dead-drop
 changelog:
   sort: asc

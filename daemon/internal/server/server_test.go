@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/protean-labs/dead-drop/daemon/internal/config"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/config"
 )
 
 func TestInsecureLoopbackStartsWithoutTailscale(t *testing.T) {

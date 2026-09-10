@@ -27,5 +27,5 @@ spctl --assess --type execute --verbose=2 "$app"
 # Sparkle's tool reads the private signing key from the Keychain.
 generator=$(find build/Release/SourcePackages/artifacts -type f -name generate_appcast -print -quit)
 [ -n "$generator" ] || { echo 'Sparkle generate_appcast tool missing' >&2; exit 1; }
-"$generator" --download-url-prefix "https://github.com/protean-labs/dead-drop/releases/download/v$version/" dist
+"$generator" --download-url-prefix "https://github.com/proteanlabsltd/dead-drop/releases/download/v$version/" dist
 printf 'Signed, notarized release prepared in dist. Complete docs/acceptance.md before tagging.\n'

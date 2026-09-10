@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/protean-labs/dead-drop/daemon/internal/tsauth"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/tsauth"
 )
 
 type fakeAuth struct{ err error }
