@@ -2,12 +2,12 @@
 
 ## Wire protocol (v1)
 
-All responses are JSON unless streaming file bytes. Paths are absolute within the daemon's view (e.g. `/home/axl/srv`); the daemon maps them to real paths only after confinement checks. Errors: `{"error":{"code":"not_found|forbidden|exists|invalid_path|io|bad_request","message":"…"}}` with matching HTTP status (404/403/409/400/500).
+All responses are JSON unless streaming file bytes. Paths are absolute within the daemon's view (e.g. `/home/alice/srv`); the daemon maps them to real paths only after confinement checks. Errors: `{"error":{"code":"not_found|forbidden|exists|invalid_path|io|bad_request","message":"…"}}` with matching HTTP status (404/403/409/400/500).
 
 Method · Path | Request | Response
 --- | --- | ---
-`GET /v1/info` | — | `{"name":"vps-fra1","version":"0.1.0","protocol":1,"roots":["/home/axl"],"user":"axl@github"}` — `user` is the caller's identity as seen by whois (useful for debugging 403s).
-`GET /v1/ls?path=` | Directory path | `{"path":"/home/axl/srv","entries":[{"name":"backups","type":"dir","size":4096,"mtime":"2026-09-10T18:02:11Z","mode":"drwxr-xr-x"},{"name":"nginx.conf","type":"file","size":2147,…}]}`. `type` ∈ `file|dir|symlink|other`; symlinks report their target type in `link_type`. Sorted dirs-first, case-insensitive.
+`GET /v1/info` | — | `{"name":"vps-fra1","version":"0.1.1","protocol":1,"roots":["/home/alice"],"user":"alice@example.com"}` — `user` is the caller's identity as seen by whois (useful for debugging 403s).
+`GET /v1/ls?path=` | Directory path | `{"path":"/home/alice/srv","entries":[{"name":"backups","type":"dir","size":4096,"mtime":"2026-09-10T18:02:11Z","mode":"drwxr-xr-x"},{"name":"nginx.conf","type":"file","size":2147,…}]}`. `type` ∈ `file|dir|symlink|other`; symlinks report their target type in `link_type`. Sorted dirs-first, case-insensitive.
 `GET /v1/stat?path=` | Any path | Single entry object as above.
 `GET /v1/read?path=` | File path. Honours `Range: bytes=N-`. | Raw bytes, `Content-Length`, `Last-Modified`, `ETag` (size-mtime), `Accept-Ranges: bytes`. 206 on range.
 `PUT /v1/write?path=&offset=0&overwrite=0` | Raw body, `Content-Length` required. Optional `X-Expected-Size` (total) and `X-Content-SHA256` (verified on final chunk). | Writes to `<path>.deaddrop-part`; when written bytes == expected size, fsync + rename. Returns the final `stat` entry, or `{"partial":true,"size":N}`. 409 `exists` if the target exists and `overwrite=0`. `HEAD /v1/write?path=` returns `X-Partial-Size` so clients can resume.

@@ -11,15 +11,19 @@
 		658B686C9D34C76DA20F34BA /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB51A617DC1687AFD909775 /* PopoverView.swift */; };
 		688A9CD6D658078A3FE89539 /* DeadDropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588C187B9F8B6669398B67CC /* DeadDropApp.swift */; };
 		817A2F0E986E57006C650822 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA68F8714295CDF95C91245 /* AppModel.swift */; };
+		8CD9933DE87E08C7D81F0222 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 1205F6F420229ACD2F79FFE2 /* LICENSE */; };
 		97E80FB8C5EA433C04986EEF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28430C5A5ED2A52835063FEA /* SettingsView.swift */; };
 		9B1E2ABD0657D9FD349CD239 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = FC9DF76C12CB807FAD19D030 /* Sparkle */; };
 		CAD5A7546E3CD85CECAF4BC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F5E81223D340FA010E0C7F4 /* Assets.xcassets */; };
 		CD2CAC4B7B6880F75B05395B /* TransfersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254C003F92E5D8DD87459343 /* TransfersView.swift */; };
 		D9B0468DB8CF0B8A27450CD2 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CD636EDA5493032709E2EAD /* SettingsStore.swift */; };
+		FF0AE28EAA87E52856A8CFCA /* NOTICE in Resources */ = {isa = PBXBuildFile; fileRef = 1282B6D40486473ECBF29980 /* NOTICE */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0CD636EDA5493032709E2EAD /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		1205F6F420229ACD2F79FFE2 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		1282B6D40486473ECBF29980 /* NOTICE */ = {isa = PBXFileReference; path = NOTICE; sourceTree = "<group>"; };
 		254C003F92E5D8DD87459343 /* TransfersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransfersView.swift; sourceTree = "<group>"; };
 		28430C5A5ED2A52835063FEA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		588C187B9F8B6669398B67CC /* DeadDropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadDropApp.swift; sourceTree = "<group>"; };
@@ -48,6 +52,7 @@
 		39194E2443D337AE11BC290C = {
 			isa = PBXGroup;
 			children = (
+				E8255DF82DCE93FE646E6FD1 /* dead-drop */,
 				CF9951967CEC37F8795F3165 /* DeadDrop */,
 				D794E90F53674A0D8ACF5CB3 /* Packages */,
 				B01899E042A0778569A8A26B /* Products */,
@@ -84,6 +89,16 @@
 				96B9B513FD40CB5A599E8570 /* DeadDropKit */,
 			);
 			name = Packages;
+			sourceTree = "<group>";
+		};
+		E8255DF82DCE93FE646E6FD1 /* dead-drop */ = {
+			isa = PBXGroup;
+			children = (
+				1205F6F420229ACD2F79FFE2 /* LICENSE */,
+				1282B6D40486473ECBF29980 /* NOTICE */,
+			);
+			name = "dead-drop";
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -150,6 +165,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAD5A7546E3CD85CECAF4BC6 /* Assets.xcassets in Resources */,
+				8CD9933DE87E08C7D81F0222 /* LICENSE in Resources */,
+				FF0AE28EAA87E52856A8CFCA /* NOTICE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,7 +195,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DeadDrop/DeadDrop.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -188,7 +205,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.proteanlabs.DeadDrop;
 				PRODUCT_NAME = "Dead Drop";
 				SDKROOT = macosx;
@@ -201,7 +218,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DeadDrop/DeadDrop.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -211,7 +228,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.proteanlabs.DeadDrop;
 				PRODUCT_NAME = "Dead Drop";
 				SDKROOT = macosx;

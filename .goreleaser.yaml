@@ -14,7 +14,7 @@ builds:
 archives:
   - formats: [tar.gz]
     name_template: 'deaddrop_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    files: [README.md, docs/protocol.md]
+    files: [LICENSE, NOTICE, README.md, docs/protocol.md]
 checksum:
   name_template: checksums.txt
 release:

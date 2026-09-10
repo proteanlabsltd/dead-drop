@@ -6,10 +6,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/client"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/config"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/install"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/server"
 	"log/slog"
 	"net"
 	"os"
@@ -23,9 +19,14 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/client"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/config"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/install"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/server"
 )
 
-var version = "0.1.0"
+var version = "0.1.1"
 
 type rootsFlag []string
 

@@ -1,6 +1,6 @@
 # Release acceptance
 
-Automated tests do not substitute for the following checks. Keep the hosted implementation plan until all items pass.
+Automated tests do not substitute for the following checks.
 
 - Ubuntu 24.04 amd64 and Debian 12 arm64: install the release via `scripts/install.sh`; systemd service is active, runs as configured user, and binds only its Tailscale IPs.
 - A second Linux host discovers the service, uploads and downloads a file with matching SHA-256.
@@ -13,10 +13,10 @@ Automated tests do not substitute for the following checks. Keep the hosted impl
 - All traversal and concurrent symlink-swap tests pass on Linux.
 - Developer ID signed and notarized DMG opens on a clean Mac without a Gatekeeper warning; repeat transfers using this release build.
 - Sparkle appcast is signed, uses the bundled public key, and updates a previous installation.
-- Check binary/formula name availability before tagging `v0.1.0`.
+- Check binary/formula name availability before tagging `v0.1.1`.
 
 ## Release procedure
 
 Set a GitHub origin for the intended repository. Run `make test`, staticcheck and `make build-mac`, plus Linux CI. Install `create-dmg`. Configure `DEVELOPER_ID_IDENTITY`, `NOTARY_PROFILE` (using `xcrun notarytool store-credentials`), and `SPARKLE_PUBLIC_KEY`. Run `scripts/release-mac.sh`. Never put private keys or credentials in source control.
 
-After acceptance, create tag `v0.1.0`, run `goreleaser release --clean`, and attach the notarized DMG and signed appcast from `dist` to the same GitHub release. An unsigned/debug build is not a shippable macOS release.
+After acceptance, push tag `v0.1.1` to trigger the Linux release workflow, then attach the notarized DMG and signed appcast from `dist` to the same GitHub release. An unsigned/debug build is not a shippable macOS release.

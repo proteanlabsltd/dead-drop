@@ -3,8 +3,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/api"
-	"github.com/proteanlabsltd/dead-drop/daemon/internal/tsauth"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/api"
+	"github.com/proteanlabsltd/dead-drop/daemon/internal/tsauth"
 )
 
 type allow struct{}
@@ -21,7 +22,7 @@ func (allow) Authorize(context.Context, string) (tsauth.Identity, error) {
 }
 func TestRoundTrip(t *testing.T) {
 	root := t.TempDir()
-	h, e := api.New(api.Options{Roots: []string{root}, Authorizer: allow{}, Version: "0.1.0"})
+	h, e := api.New(api.Options{Roots: []string{root}, Authorizer: allow{}, Version: "test"})
 	if e != nil {
 		t.Fatal(e)
 	}

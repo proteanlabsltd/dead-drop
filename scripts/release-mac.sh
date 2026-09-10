@@ -3,7 +3,7 @@ set -euo pipefail
 : "${DEVELOPER_ID_IDENTITY:?Set Developer ID Application signing identity}"
 : "${NOTARY_PROFILE:?Set a notarytool keychain profile}"
 : "${SPARKLE_PUBLIC_KEY:?Set the Sparkle Ed25519 public key}"
-version=${DEADDROP_VERSION:-0.1.0}
+version=${DEADDROP_VERSION:-0.1.1}
 cd "$(dirname "$0")/.."
 command -v create-dmg >/dev/null || { echo 'Install create-dmg with brew install create-dmg' >&2; exit 1; }
 xcodebuild -project mac/DeadDrop.xcodeproj -scheme DeadDrop -configuration Release -derivedDataPath build/Release \

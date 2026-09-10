@@ -2,19 +2,19 @@
 
 Browse and transfer files between your own Tailscale machines, without syncing. The Linux daemon exposes configured directories; the macOS 14+ menu bar app discovers it on your tailnet. No Dead Drop account or relay.
 
-This is a v0.1 implementation under validation. Release URLs below become available when a verified release is published; no release has been published from this workspace.
+Current source version: **0.1.1**. Dead Drop is early-stage software. Signed macOS releases and end-to-end release acceptance are still pending; build from source until release assets are available.
 
 Track outstanding work in [TODO.md](TODO.md).
 
 ## Install
 
-Linux (already running Tailscale and systemd):
+Once release assets are published, install on Linux (with Tailscale and systemd):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/protean-labs/dead-drop/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/proteanlabsltd/dead-drop/main/scripts/install.sh | sh
 ```
 
-Mac (download the signed DMG from the release):
+macOS release downloads:
 
 ```sh
 open https://github.com/proteanlabsltd/dead-drop/releases/latest
@@ -24,8 +24,8 @@ The installer uses sudo to install a static binary and systemd unit, then runs t
 
 ```toml
 port = 7477
-roots = ["/home/axl", "/srv"]
-allow_users = ["axl@github"]
+roots = ["/home/alice", "/srv"]
+allow_users = ["alice@example.com"]
 allow_tags = []
 follow_symlinks_outside_root = false
 ```
@@ -38,10 +38,10 @@ If `allow_users` is omitted, the daemon allows the login owning the Tailscale no
 deaddrop serve --root "$HOME"
 deaddrop status
 deaddrop hosts
-deaddrop ls vps:/home/axl
-deaddrop put ./dump.sql vps:/home/axl/backups/ --overwrite
-deaddrop get vps:/home/axl/dump.sql ./
-deaddrop mkdir vps:/home/axl/new
+deaddrop ls vps:/home/alice
+deaddrop put ./dump.sql vps:/home/alice/backups/ --overwrite
+deaddrop get vps:/home/alice/dump.sql ./
+deaddrop mkdir vps:/home/alice/new
 ```
 
 Hosts may be MagicDNS names, IPv4, `[IPv6]`, or `host:port`. Upload and download retries resume partial files. Folders transfer recursively. CLI download refuses existing destinations. Recursive symlinks are refused to avoid cycles. The Mac app provides the host picker, directory browser, Finder file drops, downloads, transfer controls and Settings.
@@ -63,4 +63,8 @@ make build-mac
 goreleaser check
 ```
 
-See [wire protocol](docs/protocol.md), [release acceptance](docs/acceptance.md), and the archived [implementation plan](docs/implementation-plan.txt). Build artifacts go in `build`/`dist`; no credentials are stored in this repository.
+See [wire protocol](docs/protocol.md), [release acceptance](docs/acceptance.md), and [contributing guide](CONTRIBUTING.md). Build artifacts go in `build`/`dist`.
+
+## License
+
+[MIT](LICENSE) © 2026 Protean Labs. Third-party dependencies retain their own licenses; see [NOTICE](NOTICE).

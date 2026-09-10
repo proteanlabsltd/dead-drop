@@ -13,6 +13,10 @@ targets:
     platform: macOS
     sources:
       - DeadDrop
+      - path: ../LICENSE
+        buildPhase: resources
+      - path: ../NOTICE
+        buildPhase: resources
     dependencies:
       - package: DeadDropKit
       - package: Sparkle
@@ -20,8 +24,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.proteanlabs.DeadDrop
         PRODUCT_NAME: Dead Drop
-        MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.1
+        CURRENT_PROJECT_VERSION: 2
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: DeadDrop/Info.plist
         CODE_SIGN_ENTITLEMENTS: DeadDrop/DeadDrop.entitlements

@@ -8,19 +8,19 @@ import (
 )
 
 func TestRenderConfinement(t *testing.T) {
-	cfg, unit, e := Render("axl", []string{"/home/axl", "/srv/my files"})
+	cfg, unit, e := Render("alice", []string{"/home/alice", "/srv/my files"})
 	if e != nil {
 		t.Fatal(e)
 	}
-	if !strings.Contains(cfg, `"/srv/my files"`) || !strings.Contains(unit, `ReadWritePaths="/home/axl" "/srv/my files"`) || !strings.Contains(unit, "User=axl") {
+	if !strings.Contains(cfg, `"/srv/my files"`) || !strings.Contains(unit, `ReadWritePaths="/home/alice" "/srv/my files"`) || !strings.Contains(unit, "User=alice") {
 		t.Fatal("incorrect rendering")
 	}
 	for _, roots := range [][]string{{"/"}, {"relative"}, {"/srv\nExecStart=evil"}, {"/srv/%h"}} {
-		if _, _, e := Render("axl", roots); e == nil {
+		if _, _, e := Render("alice", roots); e == nil {
 			t.Fatalf("accepted %q", roots)
 		}
 	}
-	if _, _, e := Render("axl\nUser=root", []string{"/srv"}); e == nil {
+	if _, _, e := Render("alice\nUser=root", []string{"/srv"}); e == nil {
 		t.Fatal("accepted user injection")
 	}
 }

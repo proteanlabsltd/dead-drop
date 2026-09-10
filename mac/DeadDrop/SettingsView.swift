@@ -38,7 +38,7 @@ struct SettingsView: View {
                 Button("Check for Updates…") { updater?.checkForUpdates() }
                     .disabled(updater == nil)
                 Spacer()
-                Text(updater == nil ? "Updates are available in signed releases" : "Dead Drop 0.1.0")
+                Text(updater == nil ? "Updates are available in signed releases" : "Dead Drop \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
                     .foregroundStyle(.secondary)
             }
         }
