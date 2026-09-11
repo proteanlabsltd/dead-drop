@@ -112,10 +112,13 @@ struct PopoverView: View {
 
     private var footer: some View {
         HStack {
-            Button { model.showTransfers.toggle() } label: {
+            Toggle(isOn: $model.showTransfers) {
                 let active = model.transfers.transfers.filter { $0.state == .running || $0.state == .queued }.count
                 Label(active == 0 ? "Transfers" : "\(active) transfer\(active == 1 ? "" : "s")", systemImage: "arrow.up.arrow.down")
-            }.buttonStyle(.plain)
+            }
+            .toggleStyle(.button)
+            .help(model.showTransfers ? "Hide transfers and return to files" : "Show transfers")
+            .accessibilityHint(model.showTransfers ? "Turn off to return to files" : "Turn on to show transfers")
             Spacer()
             Button { openSettings() } label: { Image(systemName: "gearshape") }.buttonStyle(.plain)
             Button("Quit Dead Drop") { NSApplication.shared.terminate(nil) }
